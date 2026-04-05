@@ -70,6 +70,7 @@
     padding:0.65rem 1.6rem; text-decoration:none; transition:background 0.3s;
   }
   .nav-cta:hover { background:var(--wengyan-l); }
+  .nav-find-link { color: var(--wengyan) !important; }
 
   /* HERO */
   .hero {
@@ -114,6 +115,32 @@
   .hero-actions {
     display:flex; gap:1.2rem; align-items:center;
     opacity:0; animation:fadeUp 1s ease 0.9s forwards;
+  }
+  .entry-strip {
+    margin-top: 2.2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1.1rem;
+    background: rgba(253,250,244,0.72);
+    border: 1px solid var(--jiliang-3);
+    max-width: fit-content;
+    opacity:0; animation:fadeUp 1s ease 1s forwards;
+  }
+  .entry-strip-label {
+    font-size: 0.56rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .entry-strip a {
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--wengyan);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(74,113,101,0.35);
+    padding-bottom: 2px;
   }
   .btn-main {
     font-family:'Jost',sans-serif; font-size:0.68rem;
@@ -378,8 +405,9 @@
     <li><a href="#emotions">Emotional Solutions</a></li>
     <li><a href="#product">Shop</a></li>
     <li><a href="#ritual">The Ritual</a></li>
+    <li><a href="find-my-herb.html" class="nav-find-link">Find My Herb</a></li>
   </ul>
-  <a href="#" class="nav-cta">Find Your Herb</a>
+  <a href="find-my-herb.html" class="nav-cta">Find Your Herb</a>
 </nav>
 
 <!-- HERO -->
@@ -402,7 +430,12 @@
 
     <div class="hero-actions">
       <a href="#belief" class="btn-main">Explore the Belief System</a>
-      <a href="#emotions" class="btn-sub">Find My Herb</a>
+      <a href="find-my-herb.html" class="btn-sub">Find My Herb</a>
+    </div>
+
+    <div class="entry-strip">
+      <span class="entry-strip-label">Herb Quiz</span>
+      <a href="find-my-herb.html">Enter Find My Herb</a>
     </div>
 
     <div class="hero-palette">
