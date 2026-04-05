@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBSCVRA — 幽石</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@300;400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --black-2: #0f0f0f;
+    --black-3: #161616;
+    --black-4: #1e1e1e;
+    --gold: #c4973c;
+    --gold-light: #d4af70;
+    --gold-pale: #e8c878;
+    --cream: #e8e4dc;
+    --cream-dim: #a09890;
+    --white: #f5f0e8;
+    --border: rgba(196, 151, 60, 0.18);
+    --border-hover: rgba(196, 151, 60, 0.45);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--cream);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed; width: 8px; height: 8px;
+    background: var(--gold); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transition: transform 0.15s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    position: fixed; width: 36px; height: 36px;
+    border: 1px solid rgba(196, 151, 60, 0.5); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transition: transform 0.35s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring.hover { width: 56px; height: 56px; border-color: var(--gold); }
+
+  /* Canvas particles */
+  #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.6; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 2rem 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.95) 0%, transparent 100%);
+  }
+  .nav-logo {
+    font-family: 'Cormorant SC', serif;
+    font-size: 1.1rem; font-weight: 300;
+    letter-spacing: 0.35em;
+    color: var(--gold-light);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Jost', sans-serif; font-size: 0.7rem;
+    font-weight: 300; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--cream-dim);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold-light); }
+  .nav-cta {
+    font-family: 'Jost', sans-serif; font-size: 0.65rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); border: 1px solid var(--border);
+    padding: 0.6rem 1.5rem; text-decoration: none;
+    transition: all 0.4s; background: transparent;
+  }
+  .nav-cta:hover { background: rgba(196,151,60,0.08); border-color: var(--gold); }
+
+  /* HERO */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+    z-index: 1;
+  }
+  .hero-eyebrow {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.65rem; font-weight: 300;
+    letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2rem;
+    opacity: 0; animation: fadeUp 1s ease 0.3s forwards;
+  }
+  .hero-title {
+    font-family: 'Cormorant SC', serif;
+    font-size: clamp(4.5rem, 12vw, 11rem);
+    font-weight: 300; letter-spacing: 0.08em;
+    line-height: 0.9;
+    color: var(--white);
+    opacity: 0; animation: fadeUp 1.2s ease 0.6s forwards;
+    position: relative;
+  }
+  .hero-title span {
+    display: block; color: var(--gold-light);
+    font-style: italic; font-family: 'Cormorant Garamond', serif;
+    font-size: 0.45em; letter-spacing: 0.15em;
+    margin-top: 0.3em;
+  }
+  .hero-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-weight: 300; font-style: italic;
+    color: var(--cream-dim); margin-top: 2rem;
+    letter-spacing: 0.05em;
+    opacity: 0; animation: fadeUp 1.2s ease 0.9s forwards;
+  }
+  .hero-divider {
+    width: 1px; height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    margin: 2.5rem auto;
+    opacity: 0; animation: fadeUp 1s ease 1.1s forwards;
+  }
+  .hero-cta-group {
+    display: flex; gap: 1.5rem; align-items: center;
+    opacity: 0; animation: fadeUp 1s ease 1.3s forwards;
+  }
+  .btn-primary {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem; font-weight: 300;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--black); background: var(--gold-light);
+    padding: 1rem 2.5rem; text-decoration: none;
+    transition: all 0.4s;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::after {
+    content: ''; position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.15);
+    transition: left 0.4s;
+  }
+  .btn-primary:hover::after { left: 100%; }
+  .btn-primary:hover { background: var(--gold-pale); }
+  .btn-ghost {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem; font-weight: 300;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--cream-dim); text-decoration: none;
+    transition: color 0.3s; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-ghost:hover { color: var(--gold-light); }
+  .btn-ghost::after { content: '→'; transition: transform 0.3s; }
+  .btn-ghost:hover::after { transform: translateX(4px); }
+
+  .hero-scroll {
+    position: absolute; bottom: 3rem; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--cream-dim); display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+    opacity: 0; animation: fadeUp 1s ease 1.6s forwards;
+  }
+  .hero-scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  /* MANIFESTO */
+  .manifesto {
+    position: relative; z-index: 1;
+    padding: 10rem 2rem;
+    text-align: center;
+    background: linear-gradient(to bottom, var(--black), var(--black-2), var(--black));
+  }
+  .manifesto-label {
+    font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 3rem;
+    display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+  }
+  .manifesto-label::before, .manifesto-label::after {
+    content: ''; display: block; width: 40px; height: 1px; background: var(--border-hover);
+  }
+  .manifesto-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.6rem, 4vw, 3rem);
+    font-weight: 300; line-height: 1.5;
+    color: var(--white); max-width: 800px; margin: 0 auto;
+    letter-spacing: 0.02em;
+  }
+  .manifesto-quote em { color: var(--gold-light); font-style: italic; }
+  .manifesto-body {
+    max-width: 520px; margin: 3rem auto 0;
+    font-size: 0.85rem; line-height: 2; color: var(--cream-dim);
+    letter-spacing: 0.05em;
+  }
+
+  /* INTENTIONS */
+  .intentions { position: relative; z-index: 1; padding: 6rem 3rem 10rem; }
+  .section-header {
+    text-align: center; margin-bottom: 5rem;
+  }
+  .section-label {
+    font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.5rem;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300; color: var(--white);
+    letter-spacing: 0.05em;
+  }
+  .section-title em { font-style: italic; color: var(--gold-light); }
+
+  .intentions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1100px; margin: 0 auto;
+  }
+  .intention-card {
+    background: var(--black-2);
+    padding: 3rem 2.5rem 2.5rem;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+    transition: background 0.5s;
+    cursor: none;
+  }
+  .intention-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0; transition: opacity 0.5s;
+  }
+  .intention-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(196,151,60,0.06) 0%, transparent 70%);
+    opacity: 0; transition: opacity 0.5s;
+  }
+  .intention-card:hover { background: var(--black-3); }
+  .intention-card:hover::before, .intention-card:hover::after { opacity: 1; }
+
+  .card-glyph {
+    font-size: 1.8rem; margin-bottom: 1.5rem;
+    color: var(--gold); line-height: 1;
+    font-family: serif;
+  }
+  .card-intent {
+    font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.8rem;
+  }
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 300;
+    color: var(--white); margin-bottom: 1rem; line-height: 1.2;
+  }
+  .card-desc {
+    font-size: 0.8rem; line-height: 1.9; color: var(--cream-dim);
+    flex: 1; letter-spacing: 0.03em;
+  }
+  .card-stones {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.8rem;
+  }
+  .stone-tag {
+    font-size: 0.6rem; letter-spacing: 0.15em;
+    color: var(--gold); border: 1px solid var(--border);
+    padding: 0.3rem 0.8rem;
+    transition: border-color 0.3s;
+  }
+  .intention-card:hover .stone-tag { border-color: var(--border-hover); }
+  .card-arrow {
+    position: absolute; bottom: 2rem; right: 2rem;
+    font-size: 1.2rem; color: var(--gold); opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .intention-card:hover .card-arrow { opacity: 1; transform: translate(3px, -3px); }
+
+  /* FEATURED */
+  .featured {
+    position: relative; z-index: 1;
+    padding: 8rem 3rem;
+    background: var(--black-2);
+    overflow: hidden;
+  }
+  .featured::before {
+    content: ''; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(196,151,60,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .featured-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  .featured-visual {
+    position: relative; aspect-ratio: 3/4;
+    background: var(--black-3);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .featured-visual-inner {
+    width: 65%; height: 65%;
+    position: relative;
+  }
+  .stone-illustration {
+    width: 100%; height: 100%;
+    animation: stonePulse 4s ease infinite;
+  }
+  .featured-badge {
+    position: absolute; top: 1.5rem; left: 1.5rem;
+    font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem; background: rgba(8,8,8,0.8);
+  }
+  .featured-price {
+    position: absolute; bottom: 1.5rem; right: 1.5rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem; color: var(--gold-light);
+  }
+
+  .featured-content { padding: 1rem 0; }
+  .featured-meta {
+    font-size: 0.6rem; letter-spacing: 0.35em;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .featured-meta span { color: var(--cream-dim); }
+  .featured-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300; line-height: 1.2;
+    color: var(--white); margin-bottom: 2rem;
+  }
+  .featured-title em { font-style: italic; color: var(--gold-light); }
+  .featured-body {
+    font-size: 0.85rem; line-height: 2; color: var(--cream-dim);
+    margin-bottom: 2.5rem; letter-spacing: 0.03em;
+  }
+  .featured-properties {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1.2rem; margin-bottom: 3rem;
+    border-top: 1px solid var(--border); padding-top: 2rem;
+  }
+  .prop-item { }
+  .prop-label {
+    font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.4rem;
+  }
+  .prop-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; color: var(--cream);
+  }
+  .featured-actions { display: flex; gap: 1.2rem; align-items: center; }
+
+  /* RITUAL */
+  .ritual { position: relative; z-index: 1; padding: 10rem 3rem; }
+  .ritual-inner { max-width: 900px; margin: 0 auto; }
+  .ritual-steps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; margin-top: 5rem;
+    position: relative;
+  }
+  .ritual-steps::before {
+    content: ''; position: absolute;
+    top: 2.5rem; left: calc(100%/6); right: calc(100%/6);
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-light), transparent);
+    opacity: 0.3;
+  }
+  .ritual-step { text-align: center; padding: 0 2rem; }
+  .step-num {
+    width: 5rem; height: 5rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    margin: 0 auto 2rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant SC', serif;
+    font-size: 1.2rem; color: var(--gold-light);
+    position: relative;
+    transition: border-color 0.4s, background 0.4s;
+  }
+  .ritual-step:hover .step-num {
+    border-color: var(--gold); background: rgba(196,151,60,0.05);
+  }
+  .step-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-weight: 300;
+    color: var(--white); margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .step-desc {
+    font-size: 0.78rem; line-height: 1.9;
+    color: var(--cream-dim); letter-spacing: 0.03em;
+  }
+
+  /* TESTIMONIAL */
+  .testimonial {
+    position: relative; z-index: 1;
+    background: var(--black-2);
+    padding: 8rem 3rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .testimonial-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 300; font-style: italic;
+    color: var(--white); max-width: 700px; margin: 0 auto 2rem;
+    line-height: 1.6;
+  }
+  .testimonial-author {
+    font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .testimonial-stars {
+    color: var(--gold); font-size: 0.7rem; letter-spacing: 0.3em;
+    margin-bottom: 2.5rem;
+  }
+
+  /* NEWSLETTER */
+  .newsletter {
+    position: relative; z-index: 1;
+    padding: 10rem 3rem;
+    text-align: center;
+  }
+  .newsletter-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300; color: var(--white);
+    margin-bottom: 1rem;
+  }
+  .newsletter-title em { font-style: italic; color: var(--gold-light); }
+  .newsletter-sub {
+    font-size: 0.85rem; color: var(--cream-dim);
+    margin-bottom: 3rem; letter-spacing: 0.05em;
+  }
+  .newsletter-form {
+    display: flex; max-width: 420px;
+    margin: 0 auto; gap: 0;
+    border: 1px solid var(--border);
+  }
+  .newsletter-form input {
+    flex: 1; background: transparent;
+    border: none; outline: none;
+    padding: 1rem 1.5rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem; color: var(--cream);
+    letter-spacing: 0.05em;
+  }
+  .newsletter-form input::placeholder { color: var(--cream-dim); }
+  .newsletter-form button {
+    background: transparent; border: none;
+    border-left: 1px solid var(--border);
+    padding: 0 1.5rem; cursor: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--gold);
+    transition: background 0.3s;
+    white-space: nowrap;
+  }
+  .newsletter-form:hover { border-color: var(--border-hover); }
+  .newsletter-form button:hover { background: rgba(196,151,60,0.08); }
+
+  /* FOOTER */
+  footer {
+    position: relative; z-index: 1;
+    background: var(--black-2);
+    border-top: 1px solid var(--border);
+    padding: 4rem 3rem;
+  }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 4rem;
+  }
+  .footer-brand-name {
+    font-family: 'Cormorant SC', serif;
+    font-size: 1.5rem; font-weight: 300;
+    letter-spacing: 0.3em; color: var(--gold-light);
+    margin-bottom: 1rem;
+  }
+  .footer-brand-tagline {
+    font-size: 0.75rem; line-height: 1.8;
+    color: var(--cream-dim); letter-spacing: 0.03em;
+  }
+  .footer-heading {
+    font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.5rem;
+  }
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 0.8rem; }
+  .footer-links a {
+    font-size: 0.78rem; color: var(--cream-dim);
+    text-decoration: none; letter-spacing: 0.05em;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold-light); }
+  .footer-bottom {
+    max-width: 1100px; margin: 3rem auto 0;
+    padding-top: 2rem; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.65rem; letter-spacing: 0.1em; color: var(--cream-dim);
+  }
+
+  /* DECORATIVE */
+  .ornament {
+    text-align: center; padding: 3rem 0;
+    font-family: serif; font-size: 1.5rem;
+    color: var(--gold); opacity: 0.4;
+    letter-spacing: 0.5em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  @keyframes stonePulse {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(196,151,60,0.3)); }
+    50% { filter: drop-shadow(0 0 40px rgba(196,151,60,0.6)); }
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.5rem; }
+    .nav-links { display: none; }
+    .intentions-grid { grid-template-columns: 1fr; }
+    .featured-inner { grid-template-columns: 1fr; }
+    .ritual-steps { grid-template-columns: 1fr; }
+    .ritual-steps::before { display: none; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">OBSCVRA · 幽石</a>
+  <ul class="nav-links">
+    <li><a href="#intentions">系列</a></li>
+    <li><a href="#featured">臻选</a></li>
+    <li><a href="#ritual">仪式</a></li>
+    <li><a href="#about">关于</a></li>
+  </ul>
+  <a href="#" class="nav-cta">探索 Discover</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">矿石 · 灵性 · 永恒 &nbsp;·&nbsp; Earth · Spirit · Eternity</p>
+  <h1 class="hero-title">
+    OBSCVRA
+    <span>幽 石</span>
+  </h1>
+  <p class="hero-subtitle">每一块矿石，都藏着地球亿万年的低语</p>
+  <div class="hero-divider"></div>
+  <div class="hero-cta-group">
+    <a href="#intentions" class="btn-primary">探索系列</a>
+    <a href="#ritual" class="btn-ghost">了解仪式</a>
+  </div>
+  <div class="hero-scroll">
+    <span>向下探寻</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto reveal" id="about">
+  <p class="manifesto-label">我们的信念</p>
+  <h2 class="manifesto-quote">
+    "不是你选择了矿石，<em>而是矿石找到了你</em>"
+  </h2>
+  <p class="manifesto-body">
+    OBSCVRA 相信，每块天然矿石都拥有独特的频率与记忆。我们从世界各地的矿脉深处精选原石，
+    经由匠人之手，将亿万年的地球能量铸入每一件珠宝。
+    戴上它，是开启一场与自己灵魂深处对话的仪式。
+  </p>
+</section>
+
+<div class="ornament reveal">✦ &nbsp;&nbsp; ✦ &nbsp;&nbsp; ✦</div>
+
+<!-- INTENTIONS -->
+<section class="intentions reveal" id="intentions">
+  <div class="section-header">
+    <p class="section-label">按意图选择</p>
+    <h2 class="section-title">找到<em>属于你的</em>矿石</h2>
+  </div>
+
+  <div class="intentions-grid">
+    <div class="intention-card">
+      <div class="card-glyph">☽</div>
+      <p class="card-intent">财富 · Abundance</p>
+      <h3 class="card-title">富足与繁盛</h3>
+      <p class="card-desc">引导丰盛能量流入生活的每个角落，开启好运与机遇之门。黄金矿石的暖意，是大地对富足的承诺。</p>
+      <div class="card-stones">
+        <span class="stone-tag">黄水晶</span>
+        <span class="stone-tag">绿幽灵</span>
+        <span class="stone-tag">虎眼石</span>
+      </div>
+      <span class="card-arrow">↗</span>
+    </div>
+
+    <div class="intention-card">
+      <div class="card-glyph">◈</div>
+      <p class="card-intent">保护 · Protection</p>
+      <h3 class="card-title">守护与结界</h3>
+      <p class="card-desc">在混沌的世界中为自己建造一道无形的屏障，黑曜石的深邃吸纳一切负面能量，守护内心宁静。</p>
+      <div class="card-stones">
+        <span class="stone-tag">黑曜石</span>
+        <span class="stone-tag">电气石</span>
+        <span class="stone-tag">拉长石</span>
+      </div>
+      <span class="card-arrow">↗</span>
+    </div>
+
+    <div class="intention-card">
+      <div class="card-glyph">♡</div>
+      <p class="card-intent">爱与疗愈 · Love</p>
+      <h3 class="card-title">爱意与治愈</h3>
+      <p class="card-desc">粉晶轻柔的玫瑰光芒，是月亮赋予爱情的语言。打开心轮，允许爱流入，也允许旧伤缓缓痊愈。</p>
+      <div class="card-stones">
+        <span class="stone-tag">粉晶</span>
+        <span class="stone-tag">月光石</span>
+        <span class="stone-tag">蔷薇辉石</span>
+      </div>
+      <span class="card-arrow">↗</span>
+    </div>
+
+    <div class="intention-card">
+      <div class="card-glyph">⬡</div>
+      <p class="card-intent">直觉 · Intuition</p>
+      <h3 class="card-title">洞察与智慧</h3>
+      <p class="card-desc">紫水晶连接第三眼脉轮，开启内在的直觉感知，在纷繁中找到属于自己的方向与清明。</p>
+      <div class="card-stones">
+        <span class="stone-tag">紫水晶</span>
+        <span class="stone-tag">青金石</span>
+        <span class="stone-tag">萤石</span>
+      </div>
+      <span class="card-arrow">↗</span>
+    </div>
+
+    <div class="intention-card">
+      <div class="card-glyph">⊕</div>
+      <p class="card-intent">接地 · Grounding</p>
+      <h3 class="card-title">平衡与稳固</h3>
+      <p class="card-desc">在飞速运转的世界里找到落脚之处，深色矿石的厚重将你锚定在当下，带来踏实与从容。</p>
+      <div class="card-stones">
+        <span class="stone-tag">红碧玉</span>
+        <span class="stone-tag">烟晶</span>
+        <span class="stone-tag">赤铁矿</span>
+      </div>
+      <span class="card-arrow">↗</span>
+    </div>
+
+    <div class="intention-card">
+      <div class="card-glyph">✶</div>
+      <p class="card-intent">转化 · Transformation</p>
+      <h3 class="card-title">蜕变与新生</h3>
+      <p class="card-desc">孔雀石的漩涡纹路，记录着每一次蜕皮与重生。当你准备好改变，让矿石成为你转化的见证者。</p>
+      <div class="card-stones">
+        <span class="stone-tag">孔雀石</span>
+        <span class="stone-tag">海蓝宝</span>
+        <span class="stone-tag">拓帕石</span>
+      </div>
+      <span class="card-arrow">↗</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCT -->
+<section class="featured" id="featured">
+  <div class="featured-inner">
+    <div class="featured-visual reveal">
+      <span class="featured-badge">本季臻选 · Featured</span>
+      <div class="featured-visual-inner">
+        <!-- Illustrated black obsidian crystal -->
+        <svg viewBox="0 0 200 240" class="stone-illustration" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="obsidian" cx="45%" cy="35%" r="60%">
+              <stop offset="0%" stop-color="#3a3028"/>
+              <stop offset="40%" stop-color="#1a1510"/>
+              <stop offset="100%" stop-color="#050505"/>
+            </radialGradient>
+            <radialGradient id="glint" cx="35%" cy="25%" r="30%">
+              <stop offset="0%" stop-color="#c4973c" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#c4973c" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Main crystal body -->
+          <polygon points="100,10 175,75 160,185 100,225 40,185 25,75" fill="url(#obsidian)"/>
+          <!-- Inner facets -->
+          <polygon points="100,10 175,75 100,120" fill="rgba(60,45,35,0.5)"/>
+          <polygon points="25,75 100,120 100,10" fill="rgba(20,15,10,0.3)"/>
+          <polygon points="100,120 175,75 160,185 100,225" fill="rgba(15,12,8,0.4)"/>
+          <polygon points="100,120 25,75 40,185 100,225" fill="rgba(30,22,15,0.3)"/>
+          <!-- Gold glint -->
+          <ellipse cx="85" cy="55" rx="25" ry="18" fill="url(#glint)" opacity="0.7"/>
+          <!-- Edge highlight -->
+          <polyline points="100,10 175,75" stroke="rgba(196,151,60,0.4)" stroke-width="1" fill="none"/>
+          <polyline points="100,10 25,75" stroke="rgba(196,151,60,0.15)" stroke-width="0.5" fill="none"/>
+          <!-- Small constellation dots -->
+          <circle cx="130" cy="160" r="1.5" fill="#c4973c" opacity="0.6"/>
+          <circle cx="145" cy="140" r="1" fill="#c4973c" opacity="0.4"/>
+          <circle cx="120" cy="175" r="1" fill="#c4973c" opacity="0.3"/>
+          <line x1="130" y1="160" x2="145" y2="140" stroke="rgba(196,151,60,0.2)" stroke-width="0.5"/>
+          <line x1="130" y1="160" x2="120" y2="175" stroke="rgba(196,151,60,0.2)" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <div class="featured-price">¥ 2,180</div>
+    </div>
+
+    <div class="featured-content reveal">
+      <p class="featured-meta">臻选系列 · SIGNATURE <span>|</span> No. 07</p>
+      <h2 class="featured-title">
+        黑曜石<br>
+        <em>守护者手链</em>
+      </h2>
+      <p class="featured-body">
+        来自墨西哥火山口的顶级黑曜石，历经千万年岩浆冷凝而成。
+        每一颗都经过能量净化仪式，搭配18K镀金S925银扣，
+        在黑暗中映出细微的虹彩光芒，如同深夜星空。
+      </p>
+      <div class="featured-properties">
+        <div class="prop-item">
+          <p class="prop-label">矿石产地</p>
+          <p class="prop-value">墨西哥 · 火山群</p>
+        </div>
+        <div class="prop-item">
+          <p class="prop-label">能量属性</p>
+          <p class="prop-value">保护 · 净化 · 接地</p>
+        </div>
+        <div class="prop-item">
+          <p class="prop-label">珠子尺寸</p>
+          <p class="prop-value">10mm · 天然原石</p>
+        </div>
+        <div class="prop-item">
+          <p class="prop-label">配件材质</p>
+          <p class="prop-value">18K 镀金 S925</p>
+        </div>
+      </div>
+      <div class="featured-actions">
+        <a href="#" class="btn-primary">加入购物车</a>
+        <a href="#" class="btn-ghost">查看详情</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RITUAL STEPS -->
+<section class="ritual reveal" id="ritual">
+  <div class="section-header">
+    <p class="section-label">选石仪式</p>
+    <h2 class="section-title">三步，与矿石<em>建立连接</em></h2>
+  </div>
+  <div class="ritual-inner">
+    <div class="ritual-steps">
+      <div class="ritual-step">
+        <div class="step-num">I</div>
+        <h3 class="step-title">感知意图</h3>
+        <p class="step-desc">在选择矿石之前，先在内心提出一个意图。你在寻求什么？是保护、爱，还是财富与清明？意图是矿石与你共鸣的钥匙。</p>
+      </div>
+      <div class="ritual-step">
+        <div class="step-num">II</div>
+        <h3 class="step-title">直觉引导</h3>
+        <p class="step-desc">浏览矿石时，跟随你的直觉。某一块让你的目光无法移开，某一种颜色让你的心跳加快——那就是它。逻辑之外，感觉知道答案。</p>
+      </div>
+      <div class="ritual-step">
+        <div class="step-num">III</div>
+        <h3 class="step-title">净化激活</h3>
+        <p class="step-desc">收到矿石后，在月光下放置一夜以净化能量，戴上时默念你的意图。仪式感不是迷信，而是你与内心的郑重约定。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial reveal">
+  <p class="testimonial-stars">★ ★ ★ ★ ★</p>
+  <blockquote class="testimonial-quote">
+    "拿到黑曜石手链的那一刻，我感觉到一种莫名的平静。
+    戴了三个月，很多人说我气场变了，我觉得是我和自己更近了。"
+  </blockquote>
+  <p class="testimonial-author">— S.Y. &nbsp;·&nbsp; 上海</p>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter reveal">
+  <h2 class="newsletter-title">加入<em>幽石圈层</em></h2>
+  <p class="newsletter-sub">订阅获取：新品优先体验 · 每月矿石能量指南 · 专属折扣</p>
+  <div class="newsletter-form">
+    <input type="email" placeholder="你的邮箱地址">
+    <button type="submit">订阅</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-name">OBSCVRA</div>
+      <p class="footer-brand-tagline">
+        矿石珠宝 · 灵性仪式<br>
+        Earth · Spirit · Eternity<br><br>
+        每一件珠宝都附带<br>矿石溯源证书与能量卡
+      </p>
+    </div>
+    <div>
+      <p class="footer-heading">系列</p>
+      <ul class="footer-links">
+        <li><a href="#">财富与繁盛</a></li>
+        <li><a href="#">守护与结界</a></li>
+        <li><a href="#">爱意与治愈</a></li>
+        <li><a href="#">洞察与智慧</a></li>
+        <li><a href="#">蜕变与新生</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-heading">服务</p>
+      <ul class="footer-links">
+        <li><a href="#">定制刻字</a></li>
+        <li><a href="#">矿石净化</a></li>
+        <li><a href="#">能量咨询</a></li>
+        <li><a href="#">礼盒包装</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-heading">关于</p>
+      <ul class="footer-links">
+        <li><a href="#">品牌故事</a></li>
+        <li><a href="#">矿石溯源</a></li>
+        <li><a href="#">仪式指南</a></li>
+        <li><a href="#">联系我们</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 OBSCVRA · 幽石 · All Rights Reserved</span>
+    <span>每一块矿石，都是地球写给你的一封信</span>
+  </div>
+</footer>
+
+<script>
+// Particle canvas
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W, H, particles;
+
+function init() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  particles = Array.from({length: 80}, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.2 + 0.3,
+    vx: (Math.random() - 0.5) * 0.15,
+    vy: (Math.random() - 0.5) * 0.15,
+    o: Math.random() * 0.5 + 0.1,
+    pulse: Math.random() * Math.PI * 2
+  }));
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const t = Date.now() / 1000;
+  particles.forEach(p => {
+    p.pulse += 0.008;
+    const alpha = p.o * (0.6 + 0.4 * Math.sin(p.pulse));
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(196, 151, 60, ${alpha})`;
+    ctx.fill();
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W;
+    if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H;
+    if (p.y > H) p.y = 0;
+  });
+
+  // Draw connecting lines between nearby particles
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 100) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(196,151,60,${0.06 * (1 - dist/100)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+init();
+draw();
+window.addEventListener('resize', init);
+
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = -100, my = -100;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+  ring.style.left = mx + 'px';
+  ring.style.top = my + 'px';
+});
+
+document.querySelectorAll('a, button, .intention-card').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12 });
+
+reveals.forEach(r => observer.observe(r));
+</script>
+
+</body>
+</html>
